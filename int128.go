@@ -7,29 +7,29 @@ import (
 
 // Int128 is a representation of a signed 128-bit integer
 type Int128 struct {
-	hi int64
-	lo uint64
+	Hi int64
+	Lo uint64
 }
 
 // String returns a hexadecimal (string) representation of an Int128
 func (x Int128) String() string {
 	switch {
-	case x.hi < 0:
+	case x.Hi < 0:
 		x = x.Neg()
-		if x.hi == 0 {
-			return fmt.Sprintf("-%#x", x.lo) // ignore leading 0's
+		if x.Hi == 0 {
+			return fmt.Sprintf("-%#x", x.Lo) // ignore leading 0's
 		}
-		return fmt.Sprintf("-%#x%016x", uint64(x.hi), x.lo)
-	case x.hi > 0:
-		return fmt.Sprintf("%#x%016x", uint64(x.hi), x.lo)
+		return fmt.Sprintf("-%#x%016x", uint64(x.Hi), x.Lo)
+	case x.Hi > 0:
+		return fmt.Sprintf("%#x%016x", uint64(x.Hi), x.Lo)
 	default:
-		return fmt.Sprintf("%#x", x.lo) // ignore leading 0's
+		return fmt.Sprintf("%#x", x.Lo) // ignore leading 0's
 	}
 }
 
 // NewInt128 returns an Int128 from the high and low 64 bits
 func NewInt128(hi int64, lo uint64) Int128 {
-	return Int128{hi: hi, lo: lo}
+	return Int128{Hi: hi, Lo: lo}
 }
 
 // Int128FromBigInt returns an Int128 from a big.Int
@@ -40,9 +40,9 @@ func Int128FromBigInt(a *big.Int) (z Int128) {
 		a = new(big.Int).Neg(a)
 		neg = true
 	}
-	y.lo = a.Uint64()
+	y.Lo = a.Uint64()
 	b := new(big.Int).Rsh(a, int64Size)
-	y.hi = b.Uint64()
+	y.Hi = b.Uint64()
 	z = y.Int128()
 	if neg {
 		return z.Neg()
@@ -53,14 +53,14 @@ func Int128FromBigInt(a *big.Int) (z Int128) {
 // Int128FromInt64 returns an Int128 from an int64
 func Int128FromInt64(x int64) Int128 {
 	if x >= 0 {
-		return Int128{hi: 0, lo: uint64(x)}
+		return Int128{Hi: 0, Lo: uint64(x)}
 	}
-	return Int128{hi: -1, lo: uint64(x)}
+	return Int128{Hi: -1, Lo: uint64(x)}
 }
 
 // Abs returns the absolute value of an Int128's
 func (x Int128) Abs() Int128 {
-	if x.hi < 0 {
+	if x.Hi < 0 {
 		return x.Neg()
 	}
 	return x
@@ -68,42 +68,42 @@ func (x Int128) Abs() Int128 {
 
 // Add returns the sum of two Int128's
 func (x Int128) Add(y Int128) (z Int128) {
-	z.hi = x.hi + y.hi
-	z.lo = x.lo + y.lo
-	if z.lo < x.lo {
-		z.hi++
+	z.Hi = x.Hi + y.Hi
+	z.Lo = x.Lo + y.Lo
+	if z.Lo < x.Lo {
+		z.Hi++
 	}
 	return z
 }
 
 // And returns the bitwise AND of two Int128's
 func (x Int128) And(y Int128) (z Int128) {
-	z.hi = x.hi & y.hi
-	z.lo = x.lo & y.lo
+	z.Hi = x.Hi & y.Hi
+	z.Lo = x.Lo & y.Lo
 	return z
 }
 
 // AndNot returns the bitwise AndNot of two Int128's
 func (x Int128) AndNot(y Int128) (z Int128) {
-	z.hi = x.hi &^ y.hi
-	z.lo = x.lo &^ y.lo
+	z.Hi = x.Hi &^ y.Hi
+	z.Lo = x.Lo &^ y.Lo
 	return z
 }
 
 // Cmp compares x and y and returns:
 //
-//   -1 if x <  y
-//    0 if x == y
-//   +1 if x >  y
+//	-1 if x <  y
+//	 0 if x == y
+//	+1 if x >  y
 func (x Int128) Cmp(y Int128) int {
 	switch {
-	case x.hi > y.hi:
+	case x.Hi > y.Hi:
 		return 1
-	case x.hi < y.hi:
+	case x.Hi < y.Hi:
 		return -1
-	case x.lo > y.lo:
+	case x.Lo > y.Lo:
 		return 1
-	case x.lo < y.lo:
+	case x.Lo < y.Lo:
 		return -1
 	}
 	return 0
@@ -111,9 +111,9 @@ func (x Int128) Cmp(y Int128) int {
 
 // CmpAbs compares |x| and |y| and returns:
 //
-//   -1 if |x| <  |y|
-//    0 if |x| == |y|
-//   +1 if |x| >  |y|
+//	-1 if |x| <  |y|
+//	 0 if |x| == |y|
+//	+1 if |x| >  |y|
 func (x Int128) CmpAbs(y Int128) int {
 	x = x.Abs()
 	y = y.Abs()
@@ -122,12 +122,12 @@ func (x Int128) CmpAbs(y Int128) int {
 
 // Dec returns the predecessor of an Int128
 func (x Int128) Dec() (z Int128) {
-	z.lo = x.lo - 1
-	if z.lo > x.lo {
-		z.hi = x.hi - 1
+	z.Lo = x.Lo - 1
+	if z.Lo > x.Lo {
+		z.Hi = x.Hi - 1
 		return z
 	}
-	z.hi = x.hi
+	z.Hi = x.Hi
 	return z
 }
 
@@ -168,17 +168,17 @@ func (x Int128) DivMod(d Int128) (q, r Int128) {
 
 // Eq returns whether x is equal to y
 func (x Int128) Eq(y Int128) bool {
-	return x.hi == y.hi && x.lo == y.lo
+	return x.Hi == y.Hi && x.Lo == y.Lo
 }
 
 // Gt returns whether x is greater than y
 func (x Int128) Gt(y Int128) bool {
 	switch {
-	case x.hi > y.hi:
+	case x.Hi > y.Hi:
 		return true
-	case x.hi < y.hi:
+	case x.Hi < y.Hi:
 		return false
-	case x.lo > y.lo:
+	case x.Lo > y.Lo:
 		return true
 	default:
 		return false
@@ -188,11 +188,11 @@ func (x Int128) Gt(y Int128) bool {
 // Gte returns whether x is greater than or equal to y
 func (x Int128) Gte(y Int128) bool {
 	switch {
-	case x.hi > y.hi:
+	case x.Hi > y.Hi:
 		return true
-	case x.hi < y.hi:
+	case x.Hi < y.Hi:
 		return false
-	case x.lo >= y.lo:
+	case x.Lo >= y.Lo:
 		return true
 	default:
 		return false
@@ -201,22 +201,22 @@ func (x Int128) Gte(y Int128) bool {
 
 // Inc returns the successor of an Int128
 func (x Int128) Inc() (z Int128) {
-	z.lo = x.lo + 1
-	if z.lo == 0 {
-		z.hi = x.hi + 1
+	z.Lo = x.Lo + 1
+	if z.Lo == 0 {
+		z.Hi = x.Hi + 1
 		return z
 	}
-	z.hi = x.hi
+	z.Hi = x.Hi
 	return z
 }
 
 // IsInt64 checks if the Int128 can be represented as an int64
 func (x Int128) IsInt64() bool {
-	switch x.hi {
+	switch x.Hi {
 	case 0:
-		return x.lo <= maxInt64
+		return x.Lo <= maxInt64
 	case -1:
-		return x.lo > maxInt64
+		return x.Lo > maxInt64
 	default:
 		return false
 	}
@@ -224,7 +224,7 @@ func (x Int128) IsInt64() bool {
 
 // IsNeg returns whether or not the Int128 is negative
 func (x Int128) IsNeg() bool {
-	if x.hi < 0 {
+	if x.Hi < 0 {
 		return true
 	}
 	return false
@@ -233,9 +233,9 @@ func (x Int128) IsNeg() bool {
 // IsPos returns whether or not the Int128 is positive
 func (x Int128) IsPos() bool {
 	switch {
-	case x.hi < 0:
+	case x.Hi < 0:
 		return false
-	case x.lo > 0:
+	case x.Lo > 0:
 		return true
 	default: // x is zero
 		return false
@@ -244,20 +244,20 @@ func (x Int128) IsPos() bool {
 
 // IsUint64 checks if the Int128 can be represented as a uint64 without wrapping
 func (x Int128) IsUint64() bool {
-	return x.hi == 0
+	return x.Hi == 0
 }
 
 // Int64 returns a representation of the Int128 as the builtin int64
 //
 // This function overflows silently
 func (x Int128) Int64() int64 {
-	return int64(x.lo)
+	return int64(x.Lo)
 }
 
 // LShift returns an Int128 left-shifted by 1
 func (x Int128) LShift() (z Int128) {
-	z.hi = int64(uint64(x.hi)<<1 | x.lo>>(int64Size-1))
-	z.lo = x.lo << 1
+	z.Hi = int64(uint64(x.Hi)<<1 | x.Lo>>(int64Size-1))
+	z.Lo = x.Lo << 1
 	return z
 }
 
@@ -267,12 +267,12 @@ func (x Int128) LShiftN(n uint) (z Int128) {
 	case n >= int128Size:
 		return z // z.hi, z.lo = 0, 0
 	case n >= int64Size:
-		z.hi = int64(x.lo << (n - int64Size))
-		z.lo = 0
+		z.Hi = int64(x.Lo << (n - int64Size))
+		z.Lo = 0
 		return z
 	default:
-		z.hi = int64(uint64(x.hi)<<n | x.lo>>(int64Size-n))
-		z.lo = x.lo << n
+		z.Hi = int64(uint64(x.Hi)<<n | x.Lo>>(int64Size-n))
+		z.Lo = x.Lo << n
 		return z
 	}
 }
@@ -285,12 +285,12 @@ func (x Int128) lShiftNActual(n uint) (z Int128) {
 	case n >= int128Size:
 		return z // z.hi, z.lo = 0, 0
 	case n >= int64Size:
-		z.hi = int64(x.lo << (n - int64Size))
-		z.lo = 0
+		z.Hi = int64(x.Lo << (n - int64Size))
+		z.Lo = 0
 		return z
 	default:
-		z.hi = int64(uint64(x.hi)<<n | x.lo>>(int64Size-n))
-		z.lo = x.lo << n
+		z.Hi = int64(uint64(x.Hi)<<n | x.Lo>>(int64Size-n))
+		z.Lo = x.Lo << n
 		return z
 	}
 }
@@ -298,11 +298,11 @@ func (x Int128) lShiftNActual(n uint) (z Int128) {
 // Lt returns whether x is less than y
 func (x Int128) Lt(y Int128) bool {
 	switch {
-	case x.hi < y.hi:
+	case x.Hi < y.Hi:
 		return true
-	case x.hi > y.hi:
+	case x.Hi > y.Hi:
 		return false
-	case x.lo < y.lo:
+	case x.Lo < y.Lo:
 		return true
 	default:
 		return false
@@ -312,11 +312,11 @@ func (x Int128) Lt(y Int128) bool {
 // Lte returns whether x is less than or equal to y
 func (x Int128) Lte(y Int128) bool {
 	switch {
-	case x.hi < y.hi:
+	case x.Hi < y.Hi:
 		return true
-	case x.hi > y.hi:
+	case x.Hi > y.Hi:
 		return false
-	case x.lo <= y.lo:
+	case x.Lo <= y.Lo:
 		return true
 	default:
 		return false
@@ -335,9 +335,9 @@ func (x Int128) Mod(d Int128) (r Int128) {
 // Mul returns the product of two Int128's
 func (x Int128) Mul(y Int128) (z Int128) {
 	var i uint
-	yhi := uint64(y.hi)
+	yhi := uint64(y.Hi)
 	for i = 0; i < int64Size; i++ {
-		if y.lo&(1<<i) != 0 {
+		if y.Lo&(1<<i) != 0 {
 			z = z.Add(x.lShiftNActual(i))
 		}
 	}
@@ -351,47 +351,47 @@ func (x Int128) Mul(y Int128) (z Int128) {
 
 // Nand returns the bitwise NAND of two Int128's
 func (x Int128) Nand(y Int128) (z Int128) {
-	z.hi = ^(x.hi & y.hi)
-	z.lo = ^(x.lo & y.lo)
+	z.Hi = ^(x.Hi & y.Hi)
+	z.Lo = ^(x.Lo & y.Lo)
 	return z
 }
 
 // Neg returns the additive inverse of an Int128
 func (x Int128) Neg() (z Int128) {
-	z.hi = -x.hi
-	z.lo = -x.lo
-	if z.lo > 0 {
-		z.hi--
+	z.Hi = -x.Hi
+	z.Lo = -x.Lo
+	if z.Lo > 0 {
+		z.Hi--
 	}
 	return z
 }
 
 // Nor returns the bitwise NOR of two Int128's
 func (x Int128) Nor(y Int128) (z Int128) {
-	z.hi = ^(x.hi | y.hi)
-	z.lo = ^(x.lo | y.lo)
+	z.Hi = ^(x.Hi | y.Hi)
+	z.Lo = ^(x.Lo | y.Lo)
 	return z
 }
 
 // Not returns the bitwise Not of an Int128
 func (x Int128) Not() (z Int128) {
-	z.hi = ^x.hi
-	z.lo = ^x.lo
+	z.Hi = ^x.Hi
+	z.Lo = ^x.Lo
 	return z
 }
 
 // Or returns the bitwise OR of two Int128's
 func (x Int128) Or(y Int128) (z Int128) {
-	z.hi = x.hi | y.hi
-	z.lo = x.lo | y.lo
+	z.Hi = x.Hi | y.Hi
+	z.Lo = x.Lo | y.Lo
 	return z
 }
 
 // RShift returns an Int128 right-shifted by 1
 func (x Int128) RShift() (z Int128) {
-	xhi := uint64(x.hi)
-	z.hi = int64(xhi >> 1)
-	z.lo = x.lo>>1 | xhi<<(int64Size-1)
+	xhi := uint64(x.Hi)
+	z.Hi = int64(xhi >> 1)
+	z.Lo = x.Lo>>1 | xhi<<(int64Size-1)
 	return z
 }
 
@@ -400,7 +400,7 @@ func (x Int128) RShift() (z Int128) {
 // Could probably be made faster with sign extension
 func (x Int128) RShiftN(n uint) (z Int128) {
 	neg := false
-	if x.hi < 0 {
+	if x.Hi < 0 {
 		x = x.Neg()
 		neg = true
 	}
@@ -408,11 +408,11 @@ func (x Int128) RShiftN(n uint) (z Int128) {
 	case n >= int128Size:
 		return z // z.hi, z.lo = 0, 0
 	case n >= int64Size:
-		z.hi = 0
-		z.lo = uint64(x.hi) >> (n - int64Size)
+		z.Hi = 0
+		z.Lo = uint64(x.Hi) >> (n - int64Size)
 	default:
-		z.hi = x.hi >> n
-		z.lo = x.lo>>n | uint64(x.hi)<<(int64Size-n)
+		z.Hi = x.Hi >> n
+		z.Lo = x.Lo>>n | uint64(x.Hi)<<(int64Size-n)
 	}
 	if neg {
 		return z.Neg()
@@ -422,20 +422,20 @@ func (x Int128) RShiftN(n uint) (z Int128) {
 
 // RShift128 returns an Int128 right-shifted by a Uint128 (i.e. x >> y)
 func (x Int128) RShift128(y Uint128) (z Int128) {
-	if y.hi != 0 || y.lo >= int128Size {
+	if y.Hi != 0 || y.Lo >= int128Size {
 		return x.RShiftN(int128Size)
 	}
-	return x.RShiftN(uint(y.lo))
+	return x.RShiftN(uint(y.Lo))
 }
 
 // Sign returns the sign of an Int128
 func (x Int128) Sign() int {
 	switch {
-	case x.hi > 0:
+	case x.Hi > 0:
 		return 1
-	case x.hi < 0:
+	case x.Hi < 0:
 		return -1
-	case x.lo > 0:
+	case x.Lo > 0:
 		return 1
 	}
 	return 0
@@ -443,10 +443,10 @@ func (x Int128) Sign() int {
 
 // Sub returns the difference of two Int128's
 func (x Int128) Sub(y Int128) (z Int128) {
-	z.hi = x.hi - y.hi
-	z.lo = x.lo - y.lo
-	if z.lo > x.lo {
-		z.hi--
+	z.Hi = x.Hi - y.Hi
+	z.Lo = x.Lo - y.Lo
+	if z.Lo > x.Lo {
+		z.Hi--
 	}
 	return z
 }
@@ -455,8 +455,8 @@ func (x Int128) Sub(y Int128) (z Int128) {
 //
 // This function overflows silently
 func (x Int128) Uint128() (z Uint128) {
-	z.hi = uint64(x.hi)
-	z.lo = x.lo
+	z.Hi = uint64(x.Hi)
+	z.Lo = x.Lo
 	return z
 }
 
@@ -464,19 +464,19 @@ func (x Int128) Uint128() (z Uint128) {
 //
 // This function overflows silently
 func (x Int128) Uint64() uint64 {
-	return x.lo
+	return x.Lo
 }
 
 // Xor returns the bitwise XOR of two Int128's
 func (x Int128) Xor(y Int128) (z Int128) {
-	z.hi = x.hi ^ y.hi
-	z.lo = x.lo ^ y.lo
+	z.Hi = x.Hi ^ y.Hi
+	z.Lo = x.Lo ^ y.Lo
 	return z
 }
 
 // Xnor returns the bitwise XNOR of two Int128's
 func (x Int128) Xnor(y Int128) (z Int128) {
-	z.hi = ^(x.hi ^ y.hi)
-	z.lo = ^(x.lo ^ y.lo)
+	z.Hi = ^(x.Hi ^ y.Hi)
+	z.Lo = ^(x.Lo ^ y.Lo)
 	return z
 }

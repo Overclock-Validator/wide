@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/ryanavella/wide"
+	"github.com/Overclock-Validator/wide"
 )
 
 func main() {
